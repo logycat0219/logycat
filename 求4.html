@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>籤籤中 卦卦準 - 靈龜銅錢占卜</title>
+    <style>
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="20" cy="20" r="15" fill="gold" opacity="0.1"/><circle cx="50" cy="50" r="15" fill="gold" opacity="0.1"/><circle cx="80" cy="20" r="15" fill="gold" opacity="0.1"/><circle cx="20" cy="80" r="15" fill="gold" opacity="0.1"/><circle cx="80" cy="80" r="15" fill="gold" opacity="0.1"/></svg>');
+        }
+        header {
+            background-color: #8B4513;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
+        }
+        h1 {
+            margin: 0;
+            font-size: 2.2em;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            position: relative;
+            z-index: 1;
+        }
+        .section {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .turtle-container {
+            margin: 20px auto;
+            width: 200px;
+            height: 200px;
+            position: relative;
+            overflow: hidden;
+        }
+        .turtle-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: transform 0.3s;
+        }
+        .shaking {
+            animation: shake 0.5s infinite;
+        }
+        @keyframes shake {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(5px, 5px) rotate(5deg); }
+            50% { transform: translate(0, 0) rotate(0deg); }
+            75% { transform: translate(-5px, 5px) rotate(-5deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+        button {
+            background-color: #8B4513;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1.1em;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin: 10px;
+        }
+        button:hover {
+            background-color: #A0522D;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            display: none;
+        }
+        .coins {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .coin {
+            width: 40px;
+            height: 40px;
+            background-color: gold;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .paid-service {
+            background-color: #FFEBCD;
+            border: 2px dashed #8B4513;
+        }
+        .whatsapp-btn {
+            background-color: #25D366;
+            display: inline-flex;
+            align-items: center;
+            padding: 12px 24px;
+            text-decoration: none;
+            color: white;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .whatsapp-btn:hover {
+            background-color: #128C7E;
+        }
+        .whatsapp-icon {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        .hexagram {
+            font-size: 1.5em;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .interpretation {
+            font-style: italic;
+            margin-top: 10px;
+        }
+        .instructions {
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+        .instructions p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>籤籤中 卦卦準</h1>
+        <p>靈龜銅錢占卜，預測未來指點迷津</p>
+    </header>
+
+    <div class="container">
+        <section class="section">
+            <h2>免費求籤</h2>
+            <p>搖動靈龜，擲出五枚銅錢，獲得您的卦象</p>
+            
+            <div class="instructions">
+                <p>占卜前請先靜心，專注思考想詢問的問題</p>
+                <p>問題應明確具體，一次只問一件事</p>
+                <p>搖銅錢時要誠心誠意，不可兒戲</p>
+            </div>
+            
+            <div class="turtle-container">
+                <img id="turtle" class="turtle-image" src="https://img.zhaotu.com/temp_ele/20231222/9fc5931a3e73eff8ea050baec35a878f.png" alt="靈龜">
+            </div>
+            
+            <button id="shakeBtn">搖動靈龜求籤</button>
+            
+            <div class="coins" id="coinsDisplay"></div>
+            
+            <div class="result" id="freeResult">
+                <div class="hexagram" id="hexagramName"></div>
+                <div class="interpretation" id="hexagramInterpretation"></div>
+            </div>
+        </section>
+
+        <section class="section paid-service">
+            <h2>專業解籤服務</h2>
+            <p>由本人親自為您解籤，深入分析問題</p>
+            <p>收費：每個問題 100 元</p>
+            
+            <a href="https://wa.me/85292198364" class="whatsapp-btn" target="_blank">
+                <span class="whatsapp-icon">📱</span>
+                WhatsApp 聯繫解籤
+            </a>
+        </section>
+    </div>
+
+    <script>
+        // 卦象數據
+        const hexagrams = [
+            {
+                pattern: "陰陰陰陰陰",
+                name: "星震卦",
+                interpretation: "得天之助，社會之支持，福德充滿之幸運之象。凡事能積極進行，則更佳。"
+            },
+            {
+                pattern: "陰陽陽陽陽",
+                name: "從隔卦",
+                interpretation: "幸運已臨近，不必著急，前途非常光明，只要望著既定目標努力進行，必能有成。"
+            },
+            {
+                pattern: "陽陰陽陽陽",
+                name: "曲直卦",
+                interpretation: "天雖不從人願，使你勞苦有加，然萬勿灰心洩氣，忍耐上進，相信最後勝利將屬於你。"
+            },
+            {
+                pattern: "陽陽陰陽陽",
+                name: "潤下卦",
+                interpretation: "冬盡春來，大地萬象更新，花開喜溢，花落結果之幸運之象。"
+            },
+            {
+                pattern: "陽陽陽陰陽",
+                name: "災正卦",
+                interpretation: "要有百折不撓的精神，繼續向前邁進，才能克服困難，打開僵局，見到光明，要是畏縮不進，將更陷入困窮境地。"
+            },
+            {
+                pattern: "陽陽陽陽陰",
+                name: "進檣卦",
+                interpretation: "遇到任何挫折時，切不可自暴自棄，不斷的努力，他日必有好光景。"
+            },
+            {
+                pattern: "陰陰陽陽陽",
+                name: "進求卦",
+                interpretation: "在年輕時代，雖嘗了不少苦，只要有進取心，不氣餒，終會苦盡甘來，這是雪上開花之象。"
+            },
+            {
+                pattern: "陰陽陰陽陽",
+                name: "進寶卦",
+                interpretation: "語云「有德之人，天報以德。」從此辛勞已得果，幸運到訪，精神物質兩如意。"
+            },
+            {
+                pattern: "陰陽陽陽陰",
+                name: "獲安卦",
+                interpretation: "雖有各種各樣的問題，常使心不安，但只要繼續努力，事態必能漸見好轉。"
+            },
+            {
+                pattern: "陰陽陽陰陽",
+                name: "遂心卦",
+                interpretation: "名利雙收，衣食豐隆！令人羨慕的幸運。"
+            },
+            {
+                pattern: "陽陰陰陽陽",
+                name: "災散卦",
+                interpretation: "喜氣盈滿，可獲得父母、朋友、上司、前輩的助力，同時更能給予周圍的人份外的好感。"
+            },
+            {
+                pattern: "陽陰陽陰陽",
+                name: "上進卦",
+                interpretation: "處事須有勇氣，必可得上司、前輩的提拔，好機會已迫近眼前，應好好利用。"
+            },
+            {
+                pattern: "陽陰陽陽陰",
+                name: "暗昧卦",
+                interpretation: "維持現狀，靜以待時，交際、交易、說話都要謹慎，以免招來災禍。"
+            },
+            {
+                pattern: "陽陽陰陰陽",
+                name: "安靜卦",
+                interpretation: "計劃的事，已進行的事，波折橫生，使你深受打擊，但別衝動，冷靜地研究對策，以靜制動吧！"
+            },
+            {
+                pattern: "陽陽陰陽陰",
+                name: "玄武卦",
+                interpretation: "運不佳，只有保守現狀外，別無良法。他助不如自助，求人不如求己。"
+            },
+            {
+                pattern: "陽陽陽陰陰",
+                name: "保安卦",
+                interpretation: "飛黃騰達的時機，應該積極的進行，一定有好的收穫。工作、經商按照新的計劃一件一件地進行吧！"
+            },
+            {
+                pattern: "陰陰陰陽陽",
+                name: "喜至卦",
+                interpretation: "不必著急，只要堅守現在的崗位，充實自己的一切力量，開運機會已不遠。"
+            },
+            {
+                pattern: "陰陰陽陰陽",
+                name: "保命卦",
+                interpretation: "運氣不順，連綿不斷的打擊，使你失掉信心，且常與骨肉之親發生爭執，並多招惹口舌是非。"
+            },
+            {
+                pattern: "陰陰陽陽陰",
+                name: "猶豫卦",
+                interpretation: "春在人間，大地到處充滿了鳥語花香，此時的你是被幸福所包圍。"
+            },
+            {
+                pattern: "陰陽陰陰陽",
+                name: "豐稔卦",
+                interpretation: "沒有比現在更幸運，更幸福的時候到了，所謀所望皆如意，可以好好計劃事業，著手進行。"
+            },
+            {
+                pattern: "陰陽陰陽陰",
+                name: "得祿卦",
+                interpretation: "過去雖有糾紛，或不如意的事，現在已解決告一段落，從此光明漸見。"
+            },
+            {
+                pattern: "陰陽陽陰陰",
+                name: "明顯卦",
+                interpretation: "過去的貧困和煩惱，都已經煙消雲散，從此物質精神兩無憂，自由自在樂安康。"
+            },
+            {
+                pattern: "陽陰陰陰陽",
+                name: "祐福卦",
+                interpretation: "機會總是不湊巧，要見的人見不到，徒勞往返，不如意事十之八九。"
+            },
+            {
+                pattern: "陽陰陰陽陰",
+                name: "凝滯卦",
+                interpretation: "多年來所計劃的一切事宜，已漸接近實現階段，只要百尺竿頭更進一步，前途可說光明極了。"
+            },
+            {
+                pattern: "陽陰陽陰陰",
+                name: "顯達卦",
+                interpretation: "忍耐和努力的結果，使你由不安和困苦中漸入佳境。"
+            },
+            {
+                pattern: "陽陽陰陰陰",
+                name: "福源卦",
+                interpretation: "不應自滿，凡事謹慎從事，做事自然安全。"
+            },
+            {
+                pattern: "陽陰陰陰陰",
+                name: "太平卦",
+                interpretation: "經一番勞苦後，幸福的女神終於向你靠近，此時開運的序曲已開始彈奏。"
+            },
+            {
+                pattern: "陰陰陰陽陰",
+                name: "顛險卦",
+                interpretation: "只要你野心不太大，你的花園是充滿安泰。工作方面、金錢方面皆順利。"
+            },
+            {
+                pattern: "陰陰陽陰陰",
+                name: "開發卦",
+                interpretation: "沒有什麼可憂心的問題，一年四季中，平和愉快地過活。有時也有意外的幸運來臨，使你長年的努力，獲得應有的報酬。"
+            },
+            {
+                pattern: "陰陰陰陰陽",
+                name: "揚吉卦",
+                interpretation: "現時處境猶如臨深淵，如履薄冰，心情不免戰戰兢兢。須以冷靜的頭腦去克服困難，必可開創光明的前途。"
+            },
+            {
+                pattern: "陰陽陰陰陰",
+                name: "後吉卦",
+                interpretation: "如深陷泥沼中，進退維谷，時時有嫉妒和反感，阻礙你前進道路，使你不得不苦勞。"
+            },
+            {
+                pattern: "陽陽陽陽陽",
+                name: "不利卦",
+                interpretation: "你的寶鏡蒙上灰塵，不能照出你美妙的姿態。在不安的生活中，身心疲憊。要特別注意健康方面。"
+            }
+        ];
+
+        const shakeBtn = document.getElementById('shakeBtn');
+        const turtle = document.getElementById('turtle');
+        const coinsDisplay = document.getElementById('coinsDisplay');
+        const freeResult = document.getElementById('freeResult');
+        const hexagramName = document.getElementById('hexagramName');
+        const hexagramInterpretation = document.getElementById('hexagramInterpretation');
+
+        shakeBtn.addEventListener('click', function() {
+            // 開始搖動動畫
+            turtle.classList.add('shaking');
+            shakeBtn.disabled = true;
+            
+            // 清空之前的結果
+            coinsDisplay.innerHTML = '';
+            freeResult.style.display = 'none';
+            
+            // 3秒後顯示結果
+            setTimeout(function() {
+                turtle.classList.remove('shaking');
+                shakeBtn.disabled = false;
+                
+                // 生成五枚銅錢的結果
+                const coins = [];
+                for (let i = 0; i < 5; i++) {
+                    coins.push(Math.random() > 0.5 ? '陽' : '陰');
+                }
+                
+                // 顯示銅錢
+                coinsDisplay.innerHTML = '';
+                coins.forEach(coin => {
+                    const coinEl = document.createElement('div');
+                    coinEl.className = 'coin';
+                    coinEl.textContent = coin;
+                    coinsDisplay.appendChild(coinEl);
+                });
+                
+                // 找出對應的卦象
+                const pattern = coins.join('');
+                const hexagram = hexagrams.find(h => h.pattern === pattern);
+                
+                if (hexagram) {
+                    hexagramName.textContent = `${pattern}，${hexagram.name}`;
+                    hexagramInterpretation.textContent = hexagram.interpretation;
+                } else {
+                    hexagramName.textContent = `${pattern}`;
+                    hexagramInterpretation.textContent = "此卦象暫無解釋，請聯繫專業解籤師。";
+                }
+                
+                freeResult.style.display = 'block';
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
