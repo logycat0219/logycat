@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>電話號碼分析 · 精準零變 · 無錯誤擴張</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+        }
+        body {
+            background: #f0f6fd;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            max-width: 1300px;
+            width: 100%;
+            background: white;
+            box-shadow: 0 25px 50px rgba(0,25,50,0.15);
+            border-radius: 56px;
+            padding: 35px;
+        }
+        .counter-bar {
+            background: linear-gradient(145deg, #12344a, #07212f);
+            color: white;
+            padding: 18px 30px;
+            border-radius: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+            border: 1px solid #5f86a8;
+        }
+        .counter-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.3rem;
+            font-weight: 500;
+        }
+        .counter-title span {
+            font-size: 2.3rem;
+        }
+        .counter-number {
+            background: #1c4b70;
+            padding: 8px 38px;
+            border-radius: 60px;
+            font-size: 2.3rem;
+            font-weight: 700;
+            letter-spacing: 4px;
+            border: 1px solid #ffd98c;
+            box-shadow: inset 0 -2px 5px #00000030;
+        }
+        .input-section {
+            background: #ddebff;
+            border-radius: 80px;
+            padding: 35px 30px;
+            margin-bottom: 30px;
+            border: 1px solid #98b9e3;
+        }
+        .input-label {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #0a2c47;
+            margin-bottom: 22px;
+            margin-left: 10px;
+        }
+        .bulk-input-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .eight-digit-field {
+            background: white;
+            border-radius: 70px;
+            padding: 5px 30px;
+            width: 100%;
+            max-width: 600px;
+            border: 3px solid #2c577b;
+            box-shadow: 0 8px 16px #abc0d6;
+        }
+        .eight-digit-field input {
+            width: 100%;
+            border: none;
+            font-size: 3.2rem;
+            font-weight: 700;
+            text-align: center;
+            letter-spacing: 15px;
+            color: #043753;
+            background: transparent;
+            outline: none;
+            padding: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .eight-digit-field input::placeholder {
+            letter-spacing: 2px;
+            font-size: 2rem;
+            color: #abbacf;
+        }
+        .quick-note {
+            color: #1d4968;
+            font-size: 1rem;
+            background: #eef7ff;
+            padding: 12px 28px;
+            border-radius: 50px;
+            border-left: 8px solid #f3a13b;
+        }
+        .analyze-btn {
+            background: #002845;
+            color: white;
+            border: none;
+            padding: 16px 52px;
+            border-radius: 70px;
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-top: 15px;
+            cursor: pointer;
+            transition: 0.15s;
+            box-shadow: 0 14px 22px #00284590;
+            border: 1px solid #4f7da8;
+            letter-spacing: 2px;
+        }
+        .analyze-btn:hover {
+            background: #0f4870;
+            transform: scale(1.01);
+        }
+        .result-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+            margin-top: 35px;
+        }
+        .card {
+            background: #ffffff;
+            border-radius: 52px;
+            padding: 30px 35px;
+            box-shadow: 0 12px 32px #b7cde2;
+            border: 1px solid #bed2ef;
+        }
+        .card-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #08273f;
+            border-left: 18px solid #c92c39;
+            padding-left: 25px;
+            margin-bottom: 28px;
+        }
+        .grid-2col {
+            display: grid;
+            grid-template-columns: repeat(2,1fr);
+            gap: 22px;
+        }
+        .tag {
+            background: #e4f0ff;
+            border-radius: 40px;
+            padding: 10px 24px;
+            font-weight: 500;
+            color: #0e3c61;
+            display: inline-block;
+            margin: 5px;
+            border: 1px solid #86acd9;
+            font-size: 0.95rem;
+        }
+        .meaning-block {
+            background: #f7fcff;
+            border-radius: 36px;
+            padding: 20px;
+            border-left: 14px solid;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px #cddff2;
+        }
+        .badge {
+            background: #1e3f60;
+            color: white;
+            border-radius: 60px;
+            padding: 8px 22px;
+            font-weight: 600;
+            font-size: 1rem;
+            display: inline-block;
+            margin-right: 15px;
+        }
+        .symbol-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-top: 15px;
+        }
+        .symbol-item {
+            background: #e5effa;
+            border-radius: 45px;
+            padding: 12px 26px;
+            font-weight: 600;
+            min-width: 140px;
+            text-align: center;
+            font-size: 0.98rem;
+            border: 1px solid #7fa6d4;
+            box-shadow: 0 4px 10px #b9cee8;
+        }
+        .note-footer {
+            background: #ede7f5;
+            border-radius: 52px;
+            padding: 32px 38px;
+            font-size: 1.05rem;
+            color: #123753;
+            line-height: 1.8;
+            border: 1px dashed #8f7fa8;
+        }
+        .i-ching {
+            background: #deecf9;
+            border-radius: 48px;
+            padding: 30px;
+            border: 2px solid #779dc9;
+        }
+        .small-note { font-size: 0.9rem; color: #2b4a70; margin-top: 12px; }
+        .zero-rule {
+            background: #fffae8;
+            border-radius: 45px;
+            padding: 18px 30px;
+            margin-top: 20px;
+            border-left: 16px solid #f0b341;
+            font-weight: 500;
+            font-size: 1rem;
+        }
+        .digit-box {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- 瀏覽計數器 -->
+    <div class="counter-bar">
+        <div class="counter-title"><span>👁️📈</span> 本頁瀏覽人次</div>
+        <div class="counter-number" id="visitCounter">5180</div>
+    </div>
+
+    <!-- 輸入區：一次輸入八碼 -->
+    <div class="input-section">
+        <div class="input-label">🔢 請輸入八位數字 (可直接貼上)</div>
+        <div class="bulk-input-area">
+            <div class="eight-digit-field">
+                <input type="text" id="bulkInput" maxlength="8" placeholder="例 98881666" value="98881666" inputmode="numeric" pattern="\d*">
+            </div>
+            <div class="quick-note">
+                ⚡ 修正零變規則：只有當「0」出現時才產生前後變換，不會再從非0數字錯誤生成11、44。
+            </div>
+            <button class="analyze-btn" id="analyzeBtn">✨ 精準零變・完整分析</button>
+        </div>
+    </div>
+
+    <!-- 結果區 -->
+    <div class="result-panel" id="resultArea" style="display: none;">
+        <div class="card">
+            <div class="card-title">📍 八宮定位 & 單數本義</div>
+            <div class="grid-2col" id="positionMeanings"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">🔁 零變全展開配對 (僅0產生變換)</div>
+            <div id="pairGroups" class="symbol-grid"></div>
+            <div class="small-note">* 僅當數字0出現時，才將其替換為前一個或後一個數字生成新配對。不再誤擴張。</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">🔚 尾數密碼 (末2/3/4位)</div>
+            <div id="tailMeanings" class="symbol-grid" style="background: #ecf2f0; padding: 18px; border-radius: 48px;"></div>
+        </div>
+
+        <div class="card i-ching">
+            <div class="card-title">☯ 易經八星 (零變配對)</div>
+            <div id="ichingStars" class="grid-2col"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">🌀 三位/四位 特殊組合 (原始序列延伸)</div>
+            <div id="multiCombos" class="symbol-grid"></div>
+        </div>
+
+        <div class="note-footer" id="statisticsNote"></div>
+        <div class="small-note" style="text-align:right;">* 分析以精準零變展開為基礎，易經/特殊意義皆查表得出。</div>
+    </div>
+</div>
+
+<script>
+(function() {
+    // 瀏覽計數
+    let visits = localStorage.getItem('preciseZeroVisits');
+    visits = visits ? Number(visits)+1 : 1;
+    localStorage.setItem('preciseZeroVisits', visits);
+    document.getElementById('visitCounter').innerText = visits;
+
+    // 限制輸入框只能數字
+    const bulkInput = document.getElementById('bulkInput');
+    bulkInput.addEventListener('input', function(e) {
+        this.value = this.value.replace(/[^0-9]/g, '').slice(0,8);
+    });
+
+    // ---------- 字典 (完整收錄) ----------
+    const positions = ["地位", "變動", "健康", "財富", "下屬/子女/同事", "姻緣/婚姻", "貴人/朋友", "自己"];
+    const singleMean = {
+        1: '人緣', 2: '病痛、田地、財富', 3: '小氣、計較、惹是非、口舌', 4: '君子、淑女才華、名氣、文昌',
+        5: '災難、意外、麻煩、暴君', 6: '皇帝、六六無窮', 7: '開口飯、是非、破', 8: '工作財富、金錢',
+        9: '重要、最大、有地位', 0: '空亡'
+    };
+    const elementMap = { 1:'水', 2:'土',3:'木',4:'木',5:'土',6:'金',7:'金',8:'土',9:'火',0:'土' };
+
+    const pairMean = {
+        '12':'智慧受剋／固執／不靈活／婦科病／子女宮／夫妻宮受剋', '21':'智慧受剋／固執／不靈活／婦科病／子女宮／夫妻宮受剋',
+        '15':'多災難／多病／極空組合／生殖系統毛病／腎病／耳疾／腫瘤／災禍／突然停止', '51':'多災難／多病／極空組合／生殖系統毛病／腎病／耳疾／腫瘤／災禍／突然停止',
+        '17':'重桃花／偏桃花／金水多情／貪玩／生殖系統毛病／女性流產／墮胎', '71':'重桃花／偏桃花／金水多情／貪玩／生殖系統毛病／女性流產／墮胎',
+        '16':'小三／小王介入／猶豫不決／常被傷害', '61':'小三／小王介入／猶豫不決／常被傷害',
+        '25':'恐怖組合／腫瘤／比較懶性／懶散', '52':'恐怖組合／腫瘤／比較懶性／懶散',
+        '20':'恐怖組合／腫瘤', '02':'恐怖組合／腫瘤',
+        '72':'恐怖組合／腫瘤／財運差／破財', '27':'恐怖組合／腫瘤／財運差／破財',
+        '82':'病痛會跟著主家／慢性病', '28':'病痛會跟著主家／慢性病',
+        '29':'財運差／破財／眼疾／心臟病', '92':'財運差／破財／眼疾／心臟病',
+        '24':'容易受騙／錯誤決定／招小人', '42':'容易受騙／錯誤決定／招小人',
+        '23':'惹是非／招小人／吵架', '32':'惹是非／招小人／吵架',
+        '33':'脾氣暴躁／失眠／手腳損傷／交通意外／招惹是非',
+        '34':'口舌之爭／是非／官非／風濕／中風／瘟疫', '43':'口舌之爭／是非／官非／風濕／中風／瘟疫',
+        '35':'口舌之爭／是非／官非／風濕／中風／瘟疫', '53':'口舌之爭／是非／官非／風濕／中風／瘟疫',
+        '38':'口舌之爭／是非／官非／風濕／中風／瘟疫', '83':'口舌之爭／是非／官非／風濕／中風／瘟疫',
+        '37':'遇老千', '73':'遇老千',
+        '39':'代表要做第一但招惹是非／喜歡講是非／霸道／橫蠻無理／偏桃花／眼疾／發炎／頭痛', '93':'代表要做第一但招惹是非／喜歡講是非／霸道／橫蠻無理／偏桃花／眼疾／發炎／頭痛',
+        '49':'才華／名氣／文昌升職／桃花', '94':'才華／名氣／文昌升職／桃花',
+        '42_':'影響健康／呼吸系統／腸胃病／皮膚病／手腳損傷／精神緊張／財散', '24_':'影響健康／呼吸系統／腸胃病／皮膚病／手腳損傷／精神緊張／財散',
+        '45':'陽氣不足', '54':'陽氣不足',
+        '47':'金木交戰／容易手腳損傷／肩頸問題／桃花劫／感情受損／小三小王嫁入', '74':'金木交戰／容易手腳損傷／肩頸問題／桃花劫／感情受損／小三小王嫁入',
+        '48':'腰痛', '84':'腰痛',
+        '58':'鼻疾病／手腳毛病／腸胃病／背痛／運氣差', '85':'鼻疾病／手腳毛病／腸胃病／背痛／運氣差',
+        '95':'災難／停頓／受傷／死亡／眼疾／頭痛／血光之災／吸毒／血癌／遲鈍', '59':'災難／停頓／受傷／死亡／眼疾／頭痛／血光之災／吸毒／血癌／遲鈍',
+        '66':'發揮帶來願望／必要與自己五行雙生',
+        '69':'容易被人出賣／反骨／血光之災', '96':'容易被人出賣／反骨／血光之災',
+        '64':'壓力大／撞車手術／氣管不好', '46':'壓力大／撞車手術／氣管不好',
+        '16_':'文昌組合', '61_':'文昌組合',
+        '62':'斤斤計較／頭痛／胃痛／胡思亂想／不能出現於夫妻宮', '26':'斤斤計較／頭痛／胃痛／胡思亂想／不能出現於夫妻宮',
+        '36':'是非／口舌之爭／手腳問題／手術', '63':'是非／口舌之爭／手腳問題／手術',
+        '65':'有阻滯／多病痛', '56':'有阻滯／多病痛',
+        '67':'主衝突／血光之災／夫妻宮會感情破裂', '76':'主衝突／血光之災／夫妻宮會感情破裂',
+        '27_':'戰火年年／經常鬧交', '72_':'戰火年年／經常鬧交',
+        '37_':'固執容易／吸引惡人／惹事非／吸引老千', '73_':'固執容易／吸引惡人／惹事非／吸引老千',
+        '47_':'小三／桃花劫組合／影響呼吸系統', '74_':'小三／桃花劫組合／影響呼吸系統',
+        '87':'多愁善感', '78':'多愁善感',
+        '70':'喜歡說道理但其實冇道理', '07':'喜歡說道理但其實冇道理',
+        '57':'容易鬧交／撞車', '75':'容易鬧交／撞車', '77':'容易鬧交／撞車',
+        '89':'旺財號碼', '98':'旺財號碼',
+        '28_':'多病痛／腸胃病／有腫瘤', '82_':'多病痛／腸胃病／有腫瘤',
+        '88':'非常合拍',
+        '87_':'桃花劫／刀傷組合／被騙', '78_':'桃花劫／刀傷組合／被騙',
+        '19':'做一哥', '91':'做一哥',
+        '79':'愛玩／哮喘／呼吸系統毛病／脾氣差', '97':'愛玩／哮喘／呼吸系統毛病／脾氣差',
+        '99':'美男／美女／脾氣大／文採出眾',
+        '90':'負能量', '09':'負能量'
+    };
+
+    const ichingMap = {
+        '14':'生氣(貴人/人緣)', '41':'生氣(開朗/隨緣)', '67':'生氣(貴人/人緣)', '39':'生氣(貴人/人緣)', '76':'生氣(開朗/隨緣)', '93':'生氣(開朗/隨緣)', '28':'生氣(貴人/人緣)', '82':'生氣(開朗/隨緣)',
+        '13':'天醫(財富/婚姻)', '31':'天醫(聰明/善良)', '68':'天醫(財富/婚姻)', '49':'天醫(財富/婚姻)', '86':'天醫(聰明/善良)', '94':'天醫(聰明/善良)', '27':'天醫(財富/婚姻)', '72':'天醫(聰明/善良)',
+        '19':'延年(成功/領導)', '91':'延年(事業/健康)', '78':'延年(成功/領導)', '34':'延年(成功/領導)', '87':'延年(事業/健康)', '43':'延年(事業/健康)', '26':'延年(成功/領導)', '62':'延年(事業/健康)',
+        '11':'伏位(等待/保守)', '22':'伏位(被動/思考)', '33':'伏位(等待/保守)', '44':'伏位(被動/思考)', '66':'伏位(等待/保守)', '77':'伏位(被動/思考)', '88':'伏位(等待/保守)', '99':'伏位(被動/思考)',
+        '16':'六煞(桃花/糾葛)', '47':'六煞(桃花/糾葛)', '38':'六煞(桃花/糾葛)', '29':'六煞(桃花/糾葛)', '61':'六煞(情緒/隨緣)', '74':'六煞(情緒/隨緣)', '83':'六煞(情緒/隨緣)', '92':'六煞(情緒/隨緣)',
+        '17':'禍害(口才/鐵齒)', '89':'禍害(口才/鐵齒)', '46':'禍害(口才/鐵齒)', '23':'禍害(口才/鐵齒)', '71':'禍害(暴燥/病痛)', '98':'禍害(暴燥/病痛)', '64':'禍害(暴燥/病痛)', '32':'禍害(暴燥/病痛)',
+        '18':'五鬼(是非/變化)', '79':'五鬼(是非/變化)', '36':'五鬼(是非/變化)', '24':'五鬼(是非/變化)', '81':'五鬼(情緒/凶險)', '97':'五鬼(情緒/凶險)', '63':'五鬼(情緒/凶險)', '42':'五鬼(情緒/凶險)',
+        '12':'絕命(投資/極端)', '69':'絕命(投資/極端)', '48':'絕命(投資/極端)', '37':'絕命(投資/極端)', '21':'絕命(孤獨/得罪)', '96':'絕命(孤獨/得罪)', '84':'絕命(孤獨/得罪)', '73':'絕命(孤獨/得罪)'
+    };
+
+    const multiMean = {
+        '168':'搵錢', '186':'搵錢', '250':'大凶數／容易有意外', '522':'極之恐怖組合／病痛／災難', '252':'極之恐怖組合／病痛／災難', '255':'病痛跟隨',
+        '022':'死門／容易招陰', '318':'財運差', '520':'極凶組合', '025':'極凶組合', '052':'極凶組合',
+        '666':'領導才能', '614':'桃花星貴人星', '171':'流連夜場／愛玩', '597':'流連夜場／愛玩', '577':'流連夜場／愛玩',
+        '725':'刀傷組合／手術', '777':'刀傷組合／手術', '797':'容易腦開刀', '767':'容易腦開刀', '258':'因財至禍', '892':'表面開心',
+        '618':'財星組合', '5554':'容易中風', '4224':'極凶組合', '4422':'極凶組合', '2424':'極凶組合', '8250':'超級恐怖組合'
+    };
+
+    const tailMean = {
+        '8708':'錫另一半／搵到錢', '6733':'成日鬧交／離婚', '8998':'錫另一半／做生意', '5655':'病痛', '3646':'離婚',
+        '46':'夫妻感情不好', '36':'金木交戰', '12':'皮膚病／腸胃病', '21':'皮膚病／腸胃病', '27':'財運差／破財', '29':'財運差／破財',
+        '24':'容易受騙／錯誤決定／招小人', '42':'容易受騙／錯誤決定／招小人', '13':'偏桃花', '3':'口水多過浪花', '5':'固執／大壓力',
+        '6':'能幹／管理階層', '28':'多病痛／腸胃病', '82':'多病痛／腸胃病', '3038':'容易流產','3138':'容易流產','3238':'容易流產','3338':'容易流產','3438':'容易流產','3538':'容易流產','3638':'容易流產','3738':'容易流產','3838':'容易流產','3938':'容易流產','3083':'容易流產','3183':'容易流產','3283':'容易流產','3383':'容易流產','3483':'容易流產','3583':'容易流產','3683':'容易流產','3783':'容易流產','3883':'容易流產','3983':'容易流產',
+        '9':'想像力豐富／開心',
+        '19':'精神壓力／心臟病／失眠', '91':'精神壓力／心臟病／失眠', '87':'精神壓力／心臟病／失眠', '78':'精神壓力／心臟病／失眠', '43':'精神壓力／心臟病／失眠', '34':'精神壓力／心臟病／失眠', '26':'精神壓力／心臟病／失眠', '62':'精神壓力／心臟病／失眠', '109':'精神壓力／心臟病／失眠', '901':'精神壓力／心臟病／失眠', '807':'精神壓力／心臟病／失眠', '708':'精神壓力／心臟病／失眠', '159':'精神壓力／心臟病／失眠', '951':'精神壓力／心臟病／失眠', '857':'精神壓力／心臟病／失眠', '758':'精神壓力／心臟病／失眠',
+        '14':'手腳損傷／手腳冰凍／腸胃／婦女病', '41':'手腳損傷／手腳冰凍／腸胃／婦女病', '76':'手腳損傷／手腳冰凍／腸胃／婦女病', '67':'手腳損傷／手腳冰凍／腸胃／婦女病', '39':'手腳損傷／手腳冰凍／腸胃／婦女病', '93':'手腳損傷／手腳冰凍／腸胃／婦女病', '28':'手腳損傷／手腳冰凍／腸胃／婦女病', '82':'手腳損傷／手腳冰凍／腸胃／婦女病', '104':'手腳損傷／手腳冰凍／腸胃／婦女病', '208':'手腳損傷','258':'手腳損傷','953':'手腳損傷','756':'手腳損傷','754':'手腳損傷',
+        '13_':'頭暈／眼花／三高', '31_':'頭暈／眼花／三高', '68_':'頭暈／眼花／三高', '86_':'頭暈／眼花／三高', '49_':'頭暈／眼花／三高', '94_':'頭暈／眼花／三高', '27_':'頭暈／眼花／三高', '72_':'頭暈／眼花／三高', '103':'頭暈眼花','608':'頭暈眼花','409':'頭暈眼花','207':'頭暈眼花','257':'頭暈眼花','954':'頭暈眼花','856':'頭暈眼花','351':'頭暈眼花',
+        '11':'病發一發不可收拾','22':'病發一發不可收拾','33':'病發一發不可收拾','44':'病發一發不可收拾','66':'病發一發不可收拾','77':'病發一發不可收拾','88':'病發一發不可收拾','99':'病發一發不可收拾','101':'病發一發不可收拾','202':'病發一發不可收拾','404':'病發一發不可收拾','606':'病發一發不可收拾','707':'病發一發不可收拾','808':'病發一發不可收拾','909':'病發一發不可收拾'
+    };
+
+    const multiStat = {
+        '1多':'主觀／自我／強勢控制／霸道／夫妻緣薄／難頂／腎虛心臟問題',
+        '2多':'兩手準備／包容性高／夫妻緣薄／心地好／容易心軟／辛苦命／責任心強／氣虛怕凍／腸胃不好',
+        '3多':'行動型／不受管束／想做就做／做生意／容易溝通／多勞多得／肝臟脾氣差／口舌是非／急躁／人際爭拗／官非',
+        '4多':'眼疾／近視風濕骨痛／思考／學習快／宗教信仰／朋友人緣好／口硬心軟',
+        '5多':'上落變化大／容易跌／動搖搵唔到方向／三思而後行／防守／固執／重婚／皮膚敏感／腫瘤／慢性病／衝動／迷惘',
+        '6多':'話事／指點／大哥大／有義氣／急直接／進取／要求高／工作職位領導／直接自我／肝筋骨不太好／飲酒／失眠',
+        '7多':'比較表達／唱歌／飲酒／朋友多傾心事／開口飯／說話比較叻／尾數多七般非交通意外',
+        '8多':'呆版踏實／穩陣／容易有物業／兩手準備／事業固執／平穩／唔聽人講／唔靈活／冇情趣／胃氣／皮膚敏感',
+        '9多':'轉數快創新／脾氣差／雙重性格／真誠熱情／請食飯／心血管病／血壓高／財來財去／心急快上快樂',
+        '0多':'隱藏靈性／消耗性／無中生有／不會進步／財流失／損耗／感冒／婚姻不好／宗教信仰多'
+    };
+
+    // ✅ 精準零變展開函數：只當 digit[i] 是 0 時，才產生前後變換
+    // 不再無條件產生 i 與 i+2 組合，避免 98991414 出現 11 44
+    function expandZeroPairs(digits) {
+        let pairSet = new Set();
+        let n = digits.length;
+
+        // 1. 原始相鄰 (一定要有)
+        for (let i = 0; i < n; i++) {
+            let a = digits[i];
+            let b = digits[(i + 1) % n];
+            pairSet.add('' + a + b);
+        }
+
+        // 2. 只有當某位置是 0 時，才進行零變換
+        for (let i = 0; i < n; i++) {
+            if (digits[i] === 0) {
+                let prev = digits[(i - 1 + n) % n];
+                let next = digits[(i + 1) % n];
+                
+                // 0 變成 prev：產生 prev+prev, prev+next
+                pairSet.add('' + prev + prev);
+                pairSet.add('' + prev + next);
+                
+                // 0 變成 next：產生 next+next (prev+next 可能重複但 Set 會去重)
+                pairSet.add('' + next + next);
+                
+                // 此外，考慮 prev+0 和 0+next 已經在原始相鄰中，不需重複
+            }
+        }
+
+        // 不再加入 i+2 的組合，因為那會把非0的數字也拿來配對，造成 11 44 的錯誤。
+        // 但為了保留像 59 這種範例 (98071085 需要 59)，我們檢查中間是否為0才加 (i 與 i+2 中間有0)
+        for (let i = 0; i < n; i++) {
+            if (digits[(i+1) % n] === 0) {  // 中間確實是0
+                let left = digits[i];
+                let right = digits[(i+2) % n];
+                pairSet.add('' + left + right);   // 例如 1 0 8 → 18
+                pairSet.add('' + right + left);   // 81 (可能)
+                // 也可加 left+left 與 right+right ? 但那是0變換時已經涵蓋? 不加以免過度
+            }
+        }
+
+        return Array.from(pairSet);
+    }
+
+    // 分析按鈕
+    document.getElementById('analyzeBtn').addEventListener('click', function() {
+        let raw = bulkInput.value.trim();
+        if (raw.length !== 8 || !/^\d{8}$/.test(raw)) {
+            alert('請輸入恰好8位數字 (0-9)');
+            return;
+        }
+        const digits = raw.split('').map(Number);
+        const numStr = raw;
+
+        // 1. 位置含義
+        let posHtml = '';
+        digits.forEach((d, idx) => {
+            posHtml += `<div class="meaning-block" style="border-left-color: #${(idx*130).toString(16).slice(0,4)};"><span class="badge">${positions[idx]}</span> 數字 ${d} ：${singleMean[d] || ''}  五行: ${elementMap[d]}</div>`;
+        });
+        document.getElementById('positionMeanings').innerHTML = posHtml;
+
+        // 2. 零變配對 (精準版)
+        const flexPairs = expandZeroPairs(digits);
+        let pairsHtml = [];
+        flexPairs.forEach(pair => {
+            let meaning = pairMean[pair] || pairMean[pair.split('').reverse().join('')] || '無特殊配對';
+            pairsHtml.push(`<span class="symbol-item"><b>${pair}</b> ${meaning.substring(0,30)}</span>`);
+        });
+        document.getElementById('pairGroups').innerHTML = pairsHtml.join('');
+
+        // 3. 尾數
+        let tail2 = numStr.slice(-2);
+        let tail3 = numStr.slice(-3);
+        let tail4 = numStr.slice(-4);
+        let tailMsg = [];
+        if (tailMean[tail4]) tailMsg.push(`<span class="tag">🔹末4碼 ${tail4}：${tailMean[tail4]}</span>`);
+        if (tailMean[tail3]) tailMsg.push(`<span class="tag">末3碼 ${tail3}：${tailMean[tail3]}</span>`);
+        if (tailMean[tail2]) tailMsg.push(`<span class="tag">末2碼 ${tail2}：${tailMean[tail2]}</span>`);
+        if (tailMsg.length===0) tailMsg.push('<span class="tag">尾數無特殊記載</span>');
+        document.getElementById('tailMeanings').innerHTML = tailMsg.join('');
+
+        // 4. 易經
+        let starHtml = '';
+        flexPairs.forEach(pair => {
+            let star = ichingMap[pair] || ichingMap[pair.split('').reverse().join('')] || '無八星組合';
+            starHtml += `<div><span class="badge">${pair}</span> ${star}</div>`;
+        });
+        document.getElementById('ichingStars').innerHTML = starHtml;
+
+        // 5. 三位/四位 (原始循環)
+        let multiList = [];
+        for (let i = 0; i < digits.length; i++) {
+            let tri = '' + digits[i] + digits[(i+1)%8] + digits[(i+2)%8];
+            let quad = '' + digits[i] + digits[(i+1)%8] + digits[(i+2)%8] + digits[(i+3)%8];
+            if (multiMean[tri]) multiList.push(`<span class="tag">${tri}：${multiMean[tri]}</span>`);
+            if (multiMean[quad]) multiList.push(`<span class="tag">${quad}：${multiMean[quad]}</span>`);
+        }
+        document.getElementById('multiCombos').innerHTML = multiList.length ? multiList.join('') : '<span>無特殊三位/四位組合</span>';
+
+        // 6. 統計
+        let countMap = {0:0,1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0};
+        digits.forEach(d => countMap[d]++);
+        let statLines = [];
+        for (let n=0; n<=9; n++) {
+            if (countMap[n] > 0) {
+                let key = n + '多';
+                statLines.push(`<strong>${n}出現${countMap[n]}次：</strong> ${multiStat[key] || ''}`);
+            }
+        }
+        document.getElementById('statisticsNote').innerHTML = '📊 數字多寡特質分析：<br>' + statLines.join('<br>');
+
+        document.getElementById('resultArea').style.display = 'flex';
+        window.scrollTo({ top: document.getElementById('resultArea').offsetTop - 20, behavior: 'smooth' });
+    });
+})();
+</script>
+<!-- 五行生剋 -->
+<div style="margin-top:20px; color:#1f4870; text-align:center; font-size:0.95rem;">⚡ 五行相生：金生水，水生木，木生火，火生土；相剋：金剋木、火；水剋火、土；木剋土、金；火剋金、水；土剋水、木。</div>
+</body>
+</html>
