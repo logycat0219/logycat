@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>電話號碼分析 · 精準零變 · 無錯誤擴張</title>
+    <title>電話號碼分析 · 宮位結合配對 · 精準零變</title>
     <style>
         * {
             box-sizing: border-box;
@@ -187,6 +187,21 @@
             display: inline-block;
             margin-right: 15px;
         }
+        .sub-line {
+            margin-top: 10px;
+            padding-left: 20px;
+            border-top: 1px dashed #a0bcdb;
+            font-size: 0.95rem;
+            color: #113750;
+        }
+        .pair-highlight {
+            background: #d9e8ff;
+            border-radius: 30px;
+            padding: 5px 18px;
+            display: inline-block;
+            margin-right: 10px;
+            font-weight: 600;
+        }
         .symbol-grid {
             display: flex;
             flex-wrap: wrap;
@@ -239,34 +254,34 @@
     <!-- 瀏覽計數器 -->
     <div class="counter-bar">
         <div class="counter-title"><span>👁️📈</span> 本頁瀏覽人次</div>
-        <div class="counter-number" id="visitCounter">5180</div>
+        <div class="counter-number" id="visitCounter">6180</div>
     </div>
 
-    <!-- 輸入區：一次輸入八碼 -->
+    <!-- 輸入區：一次輸入八碼 預設98149814 -->
     <div class="input-section">
-        <div class="input-label">🔢 請輸入八位數字 (可直接貼上)</div>
+        <div class="input-label">🔢 請輸入八位數字 (例：98149814)</div>
         <div class="bulk-input-area">
             <div class="eight-digit-field">
-                <input type="text" id="bulkInput" maxlength="8" placeholder="例 98881666" value="98881666" inputmode="numeric" pattern="\d*">
+                <input type="text" id="bulkInput" maxlength="8" placeholder="98881666" value="98881666" inputmode="numeric" pattern="\d*">
             </div>
             <div class="quick-note">
-                ⚡ 修正零變規則：只有當「0」出現時才產生前後變換，不會再從非0數字錯誤生成11、44。
+                ⚡ 修正零變規則：只有當「0」出現時才產生前後變換。每個宮位下方同時顯示單數及以該位起始的兩位組合。
             </div>
-            <button class="analyze-btn" id="analyzeBtn">✨ 精準零變・完整分析</button>
+            <button class="analyze-btn" id="analyzeBtn">✨ 宮位配對分析</button>
         </div>
     </div>
 
     <!-- 結果區 -->
     <div class="result-panel" id="resultArea" style="display: none;">
         <div class="card">
-            <div class="card-title">📍 八宮定位 & 單數本義</div>
+            <div class="card-title">📍 八宮定位 & 單數 + 兩數組合</div>
             <div class="grid-2col" id="positionMeanings"></div>
         </div>
 
         <div class="card">
             <div class="card-title">🔁 零變全展開配對 (僅0產生變換)</div>
             <div id="pairGroups" class="symbol-grid"></div>
-            <div class="small-note">* 僅當數字0出現時，才將其替換為前一個或後一個數字生成新配對。不再誤擴張。</div>
+            <div class="small-note">* 僅當數字0出現時，才將其替換為前一個或後一個數字生成新配對。</div>
         </div>
 
         <div class="card">
@@ -292,9 +307,9 @@
 <script>
 (function() {
     // 瀏覽計數
-    let visits = localStorage.getItem('preciseZeroVisits');
+    let visits = localStorage.getItem('preciseZeroWithPairVisits');
     visits = visits ? Number(visits)+1 : 1;
-    localStorage.setItem('preciseZeroVisits', visits);
+    localStorage.setItem('preciseZeroWithPairVisits', visits);
     document.getElementById('visitCounter').innerText = visits;
 
     // 限制輸入框只能數字
@@ -405,45 +420,36 @@
         '0多':'隱藏靈性／消耗性／無中生有／不會進步／財流失／損耗／感冒／婚姻不好／宗教信仰多'
     };
 
-    // ✅ 精準零變展開函數：只當 digit[i] 是 0 時，才產生前後變換
-    // 不再無條件產生 i 與 i+2 組合，避免 98991414 出現 11 44
+    // 精準零變展開函數 (只處理真正的0)
     function expandZeroPairs(digits) {
         let pairSet = new Set();
         let n = digits.length;
 
-        // 1. 原始相鄰 (一定要有)
+        // 原始相鄰
         for (let i = 0; i < n; i++) {
             let a = digits[i];
             let b = digits[(i + 1) % n];
             pairSet.add('' + a + b);
         }
 
-        // 2. 只有當某位置是 0 時，才進行零變換
+        // 只有0才變換
         for (let i = 0; i < n; i++) {
             if (digits[i] === 0) {
                 let prev = digits[(i - 1 + n) % n];
                 let next = digits[(i + 1) % n];
-                
-                // 0 變成 prev：產生 prev+prev, prev+next
                 pairSet.add('' + prev + prev);
                 pairSet.add('' + prev + next);
-                
-                // 0 變成 next：產生 next+next (prev+next 可能重複但 Set 會去重)
                 pairSet.add('' + next + next);
-                
-                // 此外，考慮 prev+0 和 0+next 已經在原始相鄰中，不需重複
             }
         }
 
-        // 不再加入 i+2 的組合，因為那會把非0的數字也拿來配對，造成 11 44 的錯誤。
-        // 但為了保留像 59 這種範例 (98071085 需要 59)，我們檢查中間是否為0才加 (i 與 i+2 中間有0)
+        // 中間有0的 i 與 i+2 (為了98071085的59)
         for (let i = 0; i < n; i++) {
-            if (digits[(i+1) % n] === 0) {  // 中間確實是0
+            if (digits[(i+1) % n] === 0) {
                 let left = digits[i];
                 let right = digits[(i+2) % n];
-                pairSet.add('' + left + right);   // 例如 1 0 8 → 18
-                pairSet.add('' + right + left);   // 81 (可能)
-                // 也可加 left+left 與 right+right ? 但那是0變換時已經涵蓋? 不加以免過度
+                pairSet.add('' + left + right);
+                pairSet.add('' + right + left);
             }
         }
 
@@ -460,10 +466,23 @@
         const digits = raw.split('').map(Number);
         const numStr = raw;
 
-        // 1. 位置含義
+        // 1. 位置含義 + 配對組合 (新增)
         let posHtml = '';
         digits.forEach((d, idx) => {
-            posHtml += `<div class="meaning-block" style="border-left-color: #${(idx*130).toString(16).slice(0,4)};"><span class="badge">${positions[idx]}</span> 數字 ${d} ：${singleMean[d] || ''}  五行: ${elementMap[d]}</div>`;
+            // 單數字義
+            let single = `${singleMean[d] || ''}  五行: ${elementMap[d]}`;
+            // 找出以該位起始的兩位組合 (與下一位，循環)
+            let next = digits[(idx + 1) % 8];
+            let pairKey = '' + d + next;
+            let pairMeaning = pairMean[pairKey] || pairMean[pairKey.split('').reverse().join('')] || '無特殊配對';
+            // 製作區塊
+            posHtml += `<div class="meaning-block" style="border-left-color: #${(idx*130).toString(16).slice(0,4)};">
+                <span class="badge">${positions[idx]}</span> 
+                <strong>數字 ${d} ：</strong>${single}<br>
+                <div class="sub-line">
+                    <span class="pair-highlight">${pairKey}</span> ${pairMeaning}
+                </div>
+            </div>`;
         });
         document.getElementById('positionMeanings').innerHTML = posHtml;
 
